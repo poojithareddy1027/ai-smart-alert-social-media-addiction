@@ -1,0 +1,17 @@
+date,app_name,usage_minutes,notifications,unlock_count,session_count,usage_hour,app_category
+2026-03-06,Instagram,237,45,28,18,19,social_media
+2026-03-06,LinkedIn,10,8,3,2,9,productivity
+2026-03-06,YouTube,9,2,1,1,20,entertainment
+2026-03-06,Chrome,15,0,4,3,14,productivity
+2026-03-06,WhatsApp,12,22,6,5,17,communication
+2026-03-05,Instagram,118,38,20,14,20,social_media
+2026-03-05,YouTube,55,3,4,3,21,entertainment
+2026-03-05,Gmail,18,12,5,4,10,communication
+2026-03-05,Spotify,22,1,2,1,8,entertainment
+2026-03-04,Instagram,88,29,16,11,19,social_media
+2026-03-04,LinkedIn,25,10,6,4,11,productivity
+2026-03-04,YouTube,40,2,3,2,20,entertainment
+2026-03-03,Instagram,145,52,24,16,18,social_media
+2026-03-03,TikTok,38,15,8,6,21,social_media
+2026-03-02,Instagram,92,34,18,12,19,social_media
+2026-03-02,Chrome,28,0,5,4,15,productivity

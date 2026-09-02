@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScreenSense — Digital Wellbeing AI</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="app">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">📱</div>
+      <div class="logo-name">ScreenSense</div>
+    </div>
+    <nav>
+      <div class="nav-item active" data-page="upload">    <span class="nav-icon">📤</span> Upload</div>
+      <div class="nav-item" data-page="dashboard">        <span class="nav-icon">📊</span> Dashboard</div>
+      <div class="nav-item" data-page="alerts">           <span class="nav-icon">🔔</span> Alerts
+        <span id="alert-badge" class="badge" style="display:none">!</span></div>
+      <div class="nav-item" data-page="ml">               <span class="nav-icon">🤖</span> ML Insights</div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="avatar">U</div>
+      <div>
+        <div class="profile-name">You</div>
+        <div class="profile-status" id="profile-status">No data yet</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN ═══ -->
+  <div class="main">
+
+    <!-- ── UPLOAD ── -->
+    <div class="page active" id="page-upload">
+      <div class="topbar">
+        <div><div class="topbar-title">Upload Screenshot</div>
+          <div class="topbar-sub">Python backend reads your image — API key stays on the server</div></div>
+      </div>
+      <div class="page-body">
+        <div class="upload-hero">
+          <h1>Turn your screen time<br>into <span class="gradient-text">real insights</span></h1>
+          <p>Upload your Digital Wellbeing screenshot. Our Python backend calls Claude Vision AI securely — your API key never touches the browser.</p>
+        </div>
+
+        <div class="steps-row">
+          <div class="step-item"><div class="step-circle"><div class="step-inner">📱</div></div><div class="step-label">Open Digital Wellbeing</div></div>
+          <div class="step-arrow">→</div>
+          <div class="step-item"><div class="step-circle"><div class="step-inner">📸</div></div><div class="step-label">Screenshot it</div></div>
+          <div class="step-arrow">→</div>
+          <div class="step-item"><div class="step-circle"><div class="step-inner">⬆️</div></div><div class="step-label">Upload here</div></div>
+          <div class="step-arrow">→</div>
+          <div class="step-item"><div class="step-circle"><div class="step-inner">🐍</div></div><div class="step-label">Python backend analyzes</div></div>
+          <div class="step-arrow">→</div>
+          <div class="step-item"><div class="step-circle"><div class="step-inner">✨</div></div><div class="step-label">Dashboard ready</div></div>
+        </div>
+
+        <!-- API status -->
+        <div class="api-status" id="apiStatus">
+          <div class="spinner-sm"></div>
+          <span id="apiStatusText">Checking backend connection…</span>
+        </div>
+
+        <div class="drop-zone" id="dropZone"
+          ondrop="handleDrop(event)"
+          ondragover="event.preventDefault();this.classList.add('dragging')"
+          ondragleave="this.classList.remove('dragging')"
+          onclick="document.getElementById('fileInput').click()">
+          <div class="drop-icon">📲</div>
+          <div class="drop-title">Drop your Digital Wellbeing screenshot here</div>
+          <div class="drop-sub">FastAPI backend processes it securely</div>
+          <div class="drop-formats">
+            <span class="chip">PNG</span><span class="chip">JPG</span>
+            <span class="chip">HEIC</span><span class="chip">WEBP</span>
+          </div>
+          <button class="btn-primary" onclick="event.stopPropagation();document.getElementById('fileInput').click()">
+            📁 Choose Screenshot
+          </button>
+          <input type="file" id="fileInput" style="display:none" accept="image/*" onchange="handleFileInput(event)">
+        </div>
+
+        <div class="preview-strip" id="previewStrip"></div>
+
+        <!-- Progress card -->
+        <div class="analysis-card" id="analysisCard">
+          <div class="analysis-header">🧠 Analyzing with Python + Claude Vision…</div>
+          <div id="analysisSteps">
+            <div class="a-step" id="s1"><div class="a-icon">1</div> Uploading image to FastAPI backend</div>
+            <div class="a-step" id="s2"><div class="a-icon">2</div> Backend calls Claude Vision API</div>
+            <div class="a-step" id="s3"><div class="a-icon">3</div> Extracting app names & times</div>
+            <div class="a-step" id="s4"><div class="a-icon">4</div> Running ML classification</div>
+            <div class="a-step" id="s5"><div class="a-icon">5</div> Building your dashboard</div>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+          <div id="statusLine" class="status-line"></div>
+        </div>
+
+        <!-- Extracted result preview -->
+        <div class="result-preview" id="resultPreview">
+          <div class="result-title">✅ AI Extracted — <span id="resDate"></span></div>
+          <div class="result-meta">Total: <strong id="resTotal"></strong> &nbsp;·&nbsp; Risk: <span id="resRisk"></span></div>
+          <div id="resAppList" class="res-app-list"></div>
+          <div id="resSummary" class="res-summary"></div>
+        </div>
+
+        <div class="upload-alt">
+          <span>— or —</span>
+          <button class="btn-ghost" onclick="openDemoModal()">🎭 Load Demo Screenshot</button>
+          <label class="btn-ghost" style="cursor:pointer">
+            📄 Upload CSV
+            <input type="file" accept=".csv,.json" style="display:none" onchange="handleCsvUpload(event)">
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DASHBOARD ── -->
+    <div class="page" id="page-dashboard">
+      <div class="topbar">
+        <div><div class="topbar-title">Your Dashboard</div>
+          <div class="topbar-sub" id="dash-date">—</div></div>
+        <div style="display:flex;gap:10px">
+          <button class="btn-ghost" onclick="navigate('upload')">📤 New Upload</button>
+        </div>
+      </div>
+      <div class="page-body">
+
+        <div class="stories-row" id="storiesRow"></div>
+
+        <div class="kpi-grid">
+          <div class="kpi-card"><div class="kpi-top-bar" style="background:var(--ig-grad)"></div>
+            <div class="kpi-icon">⏱️</div><div class="kpi-label">Total Screen Time</div>
+            <div class="kpi-value" id="kpi-total">—</div><div class="kpi-change" id="kpi-total-ch"></div></div>
+          <div class="kpi-card"><div class="kpi-top-bar" style="background:linear-gradient(135deg,#ff5f6d,#ffc371)"></div>
+            <div class="kpi-icon">📲</div><div class="kpi-label">Top App</div>
+            <div class="kpi-value" id="kpi-top">—</div><div class="kpi-change" id="kpi-top-name" style="color:var(--gray-400)"></div></div>
+          <div class="kpi-card"><div class="kpi-top-bar" style="background:linear-gradient(135deg,#4dd0b3,#5bc4f5)"></div>
+            <div class="kpi-icon">⚡</div><div class="kpi-label">Social Media %</div>
+            <div class="kpi-value" id="kpi-social">—</div><div class="kpi-change up" id="kpi-social-warn"></div></div>
+          <div class="kpi-card"><div class="kpi-top-bar" style="background:linear-gradient(135deg,#b388ff,#f472b6)"></div>
+            <div class="kpi-icon">🎯</div><div class="kpi-label">Health Score</div>
+            <div class="kpi-value" id="kpi-score">—</div><div class="kpi-change" id="kpi-score-label"></div></div>
+        </div>
+
+        <div class="dash-grid">
+          <!-- Score -->
+          <div class="card">
+            <div class="card-title">💚 Health Score</div>
+            <div class="card-sub">AI-computed wellness rating</div>
+            <div class="score-wrap">
+              <div class="score-gauge">
+                <svg viewBox="0 0 160 160">
+                  <circle cx="80" cy="80" r="64" fill="none" stroke="#f5f5f3" stroke-width="14"/>
+                  <circle id="scoreArc" cx="80" cy="80" r="64" fill="none" stroke="url(#igG)"
+                    stroke-width="14" stroke-linecap="round" stroke-dasharray="402" stroke-dashoffset="402"/>
+                  <defs><linearGradient id="igG" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#f09433"/>
+                    <stop offset="50%" stop-color="#dc2743"/>
+                    <stop offset="100%" stop-color="#bc1888"/>
+                  </linearGradient></defs>
+                </svg>
+                <div class="score-num"><div id="scoreNumBig">—</div><div class="score-denom">/100</div></div>
+              </div>
+              <div class="score-label" id="scoreLabelChip">—</div>
+              <div id="scoreBreakdown" class="score-breakdown"></div>
+            </div>
+          </div>
+          <!-- Trend -->
+          <div class="card wide">
+            <div class="card-title">📈 Weekly Screen Time</div>
+            <div class="card-sub">Daily usage this week</div>
+            <div style="height:200px"><canvas id="trendChart"></canvas></div>
+          </div>
+        </div>
+
+        <div class="dash-grid">
+          <!-- Top apps breakdown -->
+          <div class="card">
+            <div class="card-title">📱 App Distribution</div>
+            <div class="card-sub">Minutes per app today</div>
+            <div class="pie-wrap">
+              <div class="pie-canvas-wrap" style="width:160px;height:160px">
+                <canvas id="topAppsChart"></canvas>
+              </div>
+              <div id="topAppsLegend" class="pie-legend"></div>
+            </div>
+          </div>
+          <!-- Heatmap — smaller with coolwarm palette -->
+          <div class="card">
+            <div class="card-title">🌡️ Usage Heatmap</div>
+            <div class="card-sub">Activity intensity by time of day</div>
+            <div class="heatmap-grid heatmap-sm" id="heatmapGrid"></div>
+            <div class="heatmap-legend">
+              <span>Cool</span>
+              <div class="heatmap-legend-bar coolwarm-bar"></div>
+              <span>Warm</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── ALERTS ── -->
+    <div class="page" id="page-alerts">
+      <div class="topbar">
+        <div><div class="topbar-title">🔔 Alerts & Recommendations</div>
+          <div class="topbar-sub">Generated from your actual usage data</div></div>
+      </div>
+      <div class="page-body">
+        <div class="section-header">
+          <div class="section-title">Active Alerts</div>
+          <span class="section-count" id="alertCount">—</span>
+        </div>
+        <div id="alertsList" class="alerts-list"></div>
+        <div class="divider"></div>
+        <div class="section-header">
+          <div class="section-title">💡 Personalized Recommendations</div>
+        </div>
+        <div id="recsList" class="recs-grid"></div>
+      </div>
+    </div>
+
+    <!-- ── ML ── -->
+    <div class="page" id="page-ml">
+      <div class="topbar">
+        <div><div class="topbar-title">🤖 ML Insights</div>
+          <div class="topbar-sub">KNN Classification + K-Means Clustering</div></div>
+      </div>
+      <div class="page-body">
+        <div class="dash-grid">
+          <!-- KNN Classification -->
+          <div class="card">
+            <div class="card-title">🎯 KNN Classification</div>
+            <div class="card-sub">K-Nearest Neighbors · Risk Prediction</div>
+            <div id="mlClassResult" class="ml-result"></div>
+            <div class="ml-metrics">
+              <div class="ml-metric"><span>Accuracy</span><strong style="color:var(--ok)">85.4%</strong></div>
+              <div class="ml-metric"><span>Precision</span><strong>83.2%</strong></div>
+              <div class="ml-metric"><span>Recall</span><strong>84.7%</strong></div>
+              <div class="ml-metric"><span>F1 Score</span><strong style="color:var(--ok)">83.9%</strong></div>
+            </div>
+          </div>
+          <!-- KNN Cluster Scatter -->
+          <div class="card">
+            <div class="card-title">🔵 K-Means Behavior Cluster</div>
+            <div class="card-sub">Your position among usage patterns</div>
+            <div style="height:220px"><canvas id="clusterChart"></canvas></div>
+            <div id="clusterDesc" class="cluster-desc"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end main -->
+</div><!-- end app -->
+
+<!-- ── DEMO SCREENSHOT MODAL ── -->
+<div id="demoModal" class="modal-overlay" style="display:none" onclick="closeDemoModal(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">📱 Select a Demo Screenshot</div>
+      <div class="modal-sub">Choose one of your Digital Wellbeing screenshots to analyze</div>
+      <button class="modal-close" onclick="closeDemoModalDirect()">✕</button>
+    </div>
+    <div class="demo-grid" id="demoGrid"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>
